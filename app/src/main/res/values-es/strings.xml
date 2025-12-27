@@ -42,5 +42,9 @@
     <string name="work_completed">¡Buen trabajo! Es hora de descansar.</string>
     <string name="break_completed">¡Descanso terminado! ¿Listo para concentrarte?</string>
     <string name="long_break_completed">¡Descanso largo finalizado! ¿Iniciar un nuevo ciclo?</string>
+    <string name="notification_permission_denied">⚠️ La aplicación solo funcionará mientras esté abierta</string>
+    <string name="notification_permission_explanation">Habilita las notificaciones para mantener el temporizador funcionando en segundo plano</string>
+    <string name="enable_notifications">Habilitar Notificaciones</string>
+    <string name="all_cycles_completed">¡Felicitaciones!\n¡Completaste todos los ciclos!</string>
 </resources>
 

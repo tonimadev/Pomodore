@@ -42,5 +42,9 @@
     <string name="work_completed">干得好！该休息了。</string>
     <string name="break_completed">休息结束！准备好专注了吗？</string>
     <string name="long_break_completed">长休息结束！开始新的周期？</string>
+    <string name="notification_permission_denied">⚠️ 应用只在打开时才能工作</string>
+    <string name="notification_permission_explanation">启用通知以在后台继续运行计时器</string>
+    <string name="enable_notifications">启用通知</string>
+    <string name="all_cycles_completed">恭喜!\n您已完成所有周期！</string>
 </resources>
 

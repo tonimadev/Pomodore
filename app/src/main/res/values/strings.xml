@@ -28,6 +28,8 @@
     <string name="minutes">minutes</string>
     <string name="sessions_until_long_break">Sessions until long break</string>
     <string name="total_cycles">Total work sessions</string>
+    <string name="keep_screen_on">Keep screen on</string>
+    <string name="keep_screen_on_description">Prevent screen from turning off during timer</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
 
@@ -42,6 +44,11 @@
     <string name="notification_action_pause">Pause</string>
     <string name="notification_action_resume">Resume</string>
     <string name="notification_action_skip">Skip</string>
+
+    <!-- Permission Warning -->
+    <string name="notification_permission_denied">⚠️ App will only work while open</string>
+    <string name="notification_permission_explanation">Enable notifications to keep timer running in background</string>
+    <string name="enable_notifications">Enable Notifications</string>
 
     <!-- Completion Messages -->
     <string name="work_completed">Great work! Time for a break.</string>

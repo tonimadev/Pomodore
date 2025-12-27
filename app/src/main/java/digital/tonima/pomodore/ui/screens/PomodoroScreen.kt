@@ -1,5 +1,7 @@
 package digital.tonima.pomodore.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -12,8 +14,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,9 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import digital.tonima.pomodore.R
 import digital.tonima.pomodore.data.model.PomodoroUiState
 import digital.tonima.pomodore.data.model.TimerMode
@@ -53,6 +65,7 @@ fun PomodoroScreen(
     onSkipClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onCelebrationShown: () -> Unit,
+    hasNotificationPermission: Boolean,
     modifier: Modifier = Modifier
 ) {
     // Get current mode
@@ -121,34 +134,38 @@ fun PomodoroScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Header with current mode and settings button
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(top = 32.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Settings button aligned to the right
-                    Box(
-                        modifier = Modifier.fillMaxWidth()
+                    // Header with current mode and settings button
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(top = 32.dp)
                     ) {
-                        IconButton(
-                            onClick = onSettingsClick,
-                            modifier = Modifier.align(Alignment.TopEnd),
-                            enabled = !isTimerActive
+                        // Settings button aligned to the right
+                        Box(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = stringResource(R.string.settings),
-                                tint = if (isTimerActive)
-                                    animatedPrimaryColor.copy(alpha = 0.3f)
-                                else
-                                    animatedPrimaryColor
-                            )
+                            IconButton(
+                                onClick = onSettingsClick,
+                                modifier = Modifier.align(Alignment.TopEnd),
+                                enabled = !isTimerActive
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = stringResource(R.string.settings),
+                                    tint = if (isTimerActive)
+                                        animatedPrimaryColor.copy(alpha = 0.3f)
+                                    else
+                                        animatedPrimaryColor
+                                )
+                            }
                         }
-                    }
 
-                    Text(
-                        text = when (val state = uiState.timerState) {
-                            is TimerState.Running -> getModeString(state.mode)
+                        Text(
+                            text = when (val state = uiState.timerState) {
+                                is TimerState.Running -> getModeString(state.mode)
                             is TimerState.Paused -> getModeString(state.mode)
                             is TimerState.Completed -> getModeString(state.mode)
                             else -> stringResource(R.string.work_session)
@@ -168,6 +185,13 @@ fun PomodoroScreen(
                         color = animatedPrimaryColor
                     )
                 }
+
+                // Permission Warning Banner
+                if (!hasNotificationPermission) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PermissionWarningBanner()
+                }
+            }
 
                 // Timer display with circular progress
                 Box(
@@ -270,6 +294,79 @@ private fun getModeString(mode: TimerMode): String {
         TimerMode.WORK -> stringResource(R.string.work_session)
         TimerMode.SHORT_BREAK -> stringResource(R.string.short_break)
         TimerMode.LONG_BREAK -> stringResource(R.string.long_break)
+    }
+}
+
+@Composable
+private fun PermissionWarningBanner() {
+    val context = LocalContext.current
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFFF3CD)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = Color(0xFF856404),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = stringResource(R.string.notification_permission_denied),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        ),
+                        color = Color(0xFF856404)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(R.string.notification_permission_explanation),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 11.sp
+                        ),
+                        color = Color(0xFF856404)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF856404)
+                ),
+                modifier = Modifier
+            ) {
+                Text(
+                    text = stringResource(R.string.enable_notifications),
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 

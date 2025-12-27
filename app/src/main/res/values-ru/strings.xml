@@ -42,5 +42,9 @@
     <string name="work_completed">Отличная работа! Время отдохнуть.</string>
     <string name="break_completed">Перерыв окончен! Готовы сосредоточиться?</string>
     <string name="long_break_completed">Длинный перерыв завершён! Начать новый цикл?</string>
+    <string name="notification_permission_denied">⚠️ Приложение будет работать только при открытом окне</string>
+    <string name="notification_permission_explanation">Включите уведомления, чтобы таймер работал в фоновом режиме</string>
+    <string name="enable_notifications">Включить уведомления</string>
+    <string name="all_cycles_completed">Поздравляем!\nВы завершили все циклы!</string>
 </resources>
 

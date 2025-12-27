@@ -28,6 +28,8 @@
     <string name="minutes">minutos</string>
     <string name="sessions_until_long_break">Sessões até pausa longa</string>
     <string name="total_cycles">Total de sessões de trabalho</string>
+    <string name="keep_screen_on">Manter tela ligada</string>
+    <string name="keep_screen_on_description">Impedir que a tela desligue durante o timer</string>
     <string name="save">Salvar</string>
     <string name="cancel">Cancelar</string>
 
@@ -42,6 +44,11 @@
     <string name="notification_action_pause">Pausar</string>
     <string name="notification_action_resume">Retomar</string>
     <string name="notification_action_skip">Pular</string>
+
+    <!-- Permission Warning -->
+    <string name="notification_permission_denied">⚠️ App funcionará apenas enquanto aberto</string>
+    <string name="notification_permission_explanation">Ative as notificações para manter o timer rodando em segundo plano</string>
+    <string name="enable_notifications">Ativar Notificações</string>
 
     <!-- Completion Messages -->
     <string name="work_completed">Ótimo trabalho! Hora de descansar.</string>

@@ -38,9 +38,15 @@
     <string name="notification_action_resume">जारी रखें</string>
     <string name="notification_action_skip">छोड़ें</string>
 
+    <!-- Permission Warning -->
+    <string name="notification_permission_denied">⚠️ ऐप केवल खुली हुई अवस्था में काम करेगा</string>
+    <string name="notification_permission_explanation">टाइमर को बैकग्राउंड में चलाने के लिए नोटिफिकेशन सक्षम करें</string>
+    <string name="enable_notifications">नोटिफिकेशन सक्षम करें</string>
+
     <!-- Completion Messages -->
     <string name="work_completed">बहुत बढ़िया! विश्राम का समय।</string>
     <string name="break_completed">विराम समाप्त! ध्यान केंद्रित करने के लिए तैयार?</string>
     <string name="long_break_completed">लंबा विराम समाप्त! नया चक्र शुरू करें?</string>
+    <string name="all_cycles_completed">बधाई हो!\nआपने सभी चक्र पूर्ण कर लिए!</string>
 </resources>
 

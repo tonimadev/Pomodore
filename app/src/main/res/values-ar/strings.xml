@@ -42,5 +42,9 @@
     <string name="work_completed">عمل رائع! حان وقت الاستراحة.</string>
     <string name="break_completed">انتهت الاستراحة! مستعد للتركيز؟</string>
     <string name="long_break_completed">انتهت الاستراحة الطويلة! بدء دورة جديدة؟</string>
+    <string name="notification_permission_denied">⚠️ سيعمل التطبيق فقط أثناء فتحه</string>
+    <string name="notification_permission_explanation">قم بتفعيل الإشعارات للحفاظ على المؤقت يعمل في الخلفية</string>
+    <string name="enable_notifications">تفعيل الإشعارات</string>
+    <string name="all_cycles_completed">تهانينا!\nلقد أكملت جميع الدورات!</string>
 </resources>
 

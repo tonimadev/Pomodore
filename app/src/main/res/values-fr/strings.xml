@@ -42,5 +42,9 @@
     <string name="work_completed">Excellent travail ! C\'est l\'heure de la pause.</string>
     <string name="break_completed">Pause terminée ! Prêt à vous concentrer ?</string>
     <string name="long_break_completed">Pause longue terminée ! Commencer un nouveau cycle ?</string>
+    <string name="notification_permission_denied">⚠️ L\'application ne fonctionnera que si elle est ouverte</string>
+    <string name="notification_permission_explanation">Activez les notifications pour maintenir le minuteur en arrière-plan</string>
+    <string name="enable_notifications">Activer les Notifications</string>
+    <string name="all_cycles_completed">Félicitations !\nVous avez terminé tous les cycles !</string>
 </resources>
 

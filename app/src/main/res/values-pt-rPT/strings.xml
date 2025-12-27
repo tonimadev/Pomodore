@@ -20,11 +20,18 @@
 
     <!-- Settings -->
     <string name="settings">Definições</string>
+    <string name="settings_locked">Definições bloqueadas enquanto o temporizador está activo</string>
+    <string name="stop_timer_to_edit">Pare ou complete o temporizador para editar definições</string>
     <string name="work_duration">Duração do Trabalho</string>
     <string name="short_break_duration">Duração da Pausa Curta</string>
     <string name="long_break_duration">Duração da Pausa Longa</string>
     <string name="minutes">minutos</string>
     <string name="sessions_until_long_break">Sessões até pausa longa</string>
+    <string name="total_cycles">Total de sessões de trabalho</string>
+    <string name="keep_screen_on">Manter ecrã ligado</string>
+    <string name="keep_screen_on_description">Impedir que o ecrã desligue durante o temporizador</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Temporizador Pomodoro</string>
@@ -38,9 +45,15 @@
     <string name="notification_action_resume">Retomar</string>
     <string name="notification_action_skip">Saltar</string>
 
+    <!-- Permission Warning -->
+    <string name="notification_permission_denied">⚠️ A app funcionará apenas enquanto aberta</string>
+    <string name="notification_permission_explanation">Active as notificações para manter o temporizador a funcionar em segundo plano</string>
+    <string name="enable_notifications">Activar Notificações</string>
+
     <!-- Completion Messages -->
     <string name="work_completed">Óptimo trabalho! Hora de descansar.</string>
     <string name="break_completed">Pausa terminada! Pronto para focar?</string>
     <string name="long_break_completed">Pausa longa finalizada! Iniciar um novo ciclo?</string>
+    <string name="all_cycles_completed">Parabéns!\nConcluiu todos os ciclos!</string>
 </resources>
 

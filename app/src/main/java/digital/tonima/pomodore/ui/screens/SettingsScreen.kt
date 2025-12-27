@@ -14,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -48,6 +51,7 @@ fun SettingsScreen(
     var longBreakDuration by remember { mutableStateOf(settings.longBreakDurationMinutes.toString()) }
     var sessionsUntilLongBreak by remember { mutableStateOf(settings.sessionsUntilLongBreak.toString()) }
     var totalCycles by remember { mutableStateOf(settings.totalCycles.toString()) }
+    var keepScreenOn by remember { mutableStateOf(settings.keepScreenOn) }
 
     Scaffold(
         topBar = {
@@ -128,6 +132,39 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Keep Screen On
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.keep_screen_on),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = stringResource(R.string.keep_screen_on_description),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = keepScreenOn,
+                        onCheckedChange = { keepScreenOn = it }
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Action Buttons
@@ -149,7 +186,8 @@ fun SettingsScreen(
                             shortBreakDurationMinutes = shortBreakDuration.toIntOrNull() ?: 5,
                             longBreakDurationMinutes = longBreakDuration.toIntOrNull() ?: 15,
                             sessionsUntilLongBreak = sessionsUntilLongBreak.toIntOrNull() ?: 4,
-                            totalCycles = totalCycles.toIntOrNull() ?: 4
+                            totalCycles = totalCycles.toIntOrNull() ?: 4,
+                            keepScreenOn = keepScreenOn
                         )
                         onSaveSettings(newSettings)
                         onNavigateBack()

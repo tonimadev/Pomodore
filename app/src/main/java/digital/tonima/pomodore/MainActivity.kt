@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,6 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -63,9 +68,21 @@ class MainActivity : ComponentActivity() {
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 val navController = rememberNavController()
 
-                // Handle notification actions
-                LaunchedEffect(Unit) {
-                    handleIntent(intent, viewModel)
+                // Track intent action changes with state
+                var lastProcessedAction by remember { mutableStateOf<String?>(null) }
+                val currentAction = rememberUpdatedState(intent?.action)
+
+                // Handle notification actions - process each action when it changes
+                LaunchedEffect(currentAction.value) {
+                    val action = currentAction.value
+                    // Only process if this is a new action we haven't processed yet
+                    if (action != null && action != lastProcessedAction) {
+                        handleIntent(Intent().apply { this.action = action }, viewModel)
+                        lastProcessedAction = action
+                        // Clear action after brief delay to allow re-triggering same action
+                        kotlinx.coroutines.delay(100)
+                        lastProcessedAction = null
+                    }
                 }
 
                 // Update foreground service when timer state changes
@@ -86,7 +103,27 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                // Control screen on/off based on settings and timer state
+                LaunchedEffect(uiState.settings.keepScreenOn, uiState.timerState) {
+                    if (uiState.settings.keepScreenOn &&
+                        (uiState.timerState is TimerState.Running || uiState.timerState is TimerState.Paused)) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    } else {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    // Check notification permission status
+                    val hasNotificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        ContextCompat.checkSelfPermission(
+                            this@MainActivity,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        ) == PackageManager.PERMISSION_GRANTED
+                    } else {
+                        true
+                    }
+
                     NavHost(
                         navController = navController,
                         startDestination = "pomodoro",
@@ -108,7 +145,8 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate("settings")
                                     }
                                 },
-                                onCelebrationShown = { viewModel.markCelebrationShown() }
+                                onCelebrationShown = { viewModel.markCelebrationShown() },
+                                hasNotificationPermission = hasNotificationPermission
                             )
                         }
                         composable("settings") {
@@ -129,14 +167,16 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        // Re-trigger intent handling when activity receives a new intent
+        // Re-trigger intent handling when activity receives a new intent from notification
     }
 
     private fun handleIntent(intent: Intent?, viewModel: PomodoroViewModel) {
         when (intent?.action) {
+            Constants.ACTION_START -> viewModel.startTimer()
             Constants.ACTION_PAUSE -> viewModel.pauseTimer()
             Constants.ACTION_RESUME -> viewModel.resumeTimer()
             Constants.ACTION_SKIP -> viewModel.skipToNext()
+            Constants.ACTION_STOP -> viewModel.stopTimer()
         }
     }
 }

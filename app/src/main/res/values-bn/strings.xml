@@ -38,9 +38,15 @@
     <string name="notification_action_resume">পুনরায় শুরু করুন</string>
     <string name="notification_action_skip">এড়িয়ে যান</string>
 
+    <!-- Permission Warning -->
+    <string name="notification_permission_denied">⚠️ অ্যাপটি শুধুমাত্র খোলা থাকলে কাজ করবে</string>
+    <string name="notification_permission_explanation">টাইমার ব্যাকগ্রাউন্ডে চালু রাখতে বিজ্ঞপ্তিগুলি সক্ষম করুন</string>
+    <string name="enable_notifications">বিজ্ঞপ্তিগুলি সক্ষম করুন</string>
+
     <!-- Completion Messages -->
     <string name="work_completed">দুর্দান্ত কাজ! বিশ্রামের সময়।</string>
     <string name="break_completed">বিরতি শেষ! মনোযোগ দিতে প্রস্তুত?</string>
     <string name="long_break_completed">বড় বিরতি শেষ! নতুন চক্র শুরু করবেন?</string>
+    <string name="all_cycles_completed">অভিনন্দন!\nআপনি সমস্ত চক্র সম্পন্ন করেছেন!</string>
 </resources>
 

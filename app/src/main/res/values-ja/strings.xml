@@ -42,5 +42,9 @@
     <string name="work_completed">お疲れ様です！休憩の時間です。</string>
     <string name="break_completed">休憩終了！集中する準備はできましたか？</string>
     <string name="long_break_completed">長い休憩が終了しました！新しいサイクルを始めますか？</string>
+    <string name="notification_permission_denied">⚠️ アプリは開いている間だけ動作します</string>
+    <string name="notification_permission_explanation">タイマーをバックグラウンドで実行し続けるには、通知を有効にしてください</string>
+    <string name="enable_notifications">通知を有効にする</string>
+    <string name="all_cycles_completed">おめでとうございます！\nすべてのサイクルを完了しました！</string>
 </resources>
 
