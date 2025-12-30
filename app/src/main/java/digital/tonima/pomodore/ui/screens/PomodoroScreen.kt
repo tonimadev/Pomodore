@@ -68,7 +68,6 @@ fun PomodoroScreen(
     hasNotificationPermission: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // Get current mode
     val currentMode = when (val state = uiState.timerState) {
         is TimerState.Running -> state.mode
         is TimerState.Paused -> state.mode
@@ -76,10 +75,8 @@ fun PomodoroScreen(
         else -> TimerMode.WORK
     }
 
-    // Get colors for current mode
     val modeColors = getModeColors(currentMode)
 
-    // Animate background color transitions
     val animatedBackgroundColor by animateColorAsState(
         targetValue = modeColors.background,
         animationSpec = tween(durationMillis = 1000),
@@ -92,11 +89,9 @@ fun PomodoroScreen(
         label = "primary_color"
     )
 
-    // Check if timer is active (running or paused)
     val isTimerActive = uiState.timerState is TimerState.Running ||
                        uiState.timerState is TimerState.Paused
 
-    // Check if all cycles completed and celebration not shown yet
     val shouldShowCelebration = uiState.completedSessions >= uiState.settings.totalCycles &&
             uiState.timerState is TimerState.Idle &&
             !uiState.celebrationShown &&
@@ -107,14 +102,13 @@ fun PomodoroScreen(
     LaunchedEffect(shouldShowCelebration) {
         if (shouldShowCelebration) {
             showCelebration = true
-            delay(5000) // Show for 5 seconds
+            delay(5000)
             showCelebration = false
-            onCelebrationShown()  // Mark as shown
+            onCelebrationShown()
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Gradient background
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -138,12 +132,10 @@ fun PomodoroScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Header with current mode and settings button
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(top = 32.dp)
                     ) {
-                        // Settings button aligned to the right
                         Box(
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -166,34 +158,32 @@ fun PomodoroScreen(
                         Text(
                             text = when (val state = uiState.timerState) {
                                 is TimerState.Running -> getModeString(state.mode)
-                            is TimerState.Paused -> getModeString(state.mode)
-                            is TimerState.Completed -> getModeString(state.mode)
-                            else -> stringResource(R.string.work_session)
-                        },
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = animatedPrimaryColor
-                    )
+                                is TimerState.Paused -> getModeString(state.mode)
+                                is TimerState.Completed -> getModeString(state.mode)
+                                else -> stringResource(R.string.work_session)
+                            },
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = animatedPrimaryColor
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    SessionCounter(
-                        currentSession = uiState.currentSession,
-                        completedSessions = uiState.completedSessions,
-                        totalCycles = uiState.settings.totalCycles,
-                        color = animatedPrimaryColor
-                    )
+                        SessionCounter(
+                            currentSession = uiState.currentSession,
+                            completedSessions = uiState.completedSessions,
+                            totalCycles = uiState.settings.totalCycles,
+                            color = animatedPrimaryColor
+                        )
+                    }
+
+                    if (!hasNotificationPermission) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        PermissionWarningBanner()
+                    }
                 }
 
-                // Permission Warning Banner
-                if (!hasNotificationPermission) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    PermissionWarningBanner()
-                }
-            }
-
-                // Timer display with circular progress
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.weight(1f)
@@ -225,7 +215,6 @@ fun PomodoroScreen(
                     )
                 }
 
-                // Control buttons
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -279,7 +268,6 @@ fun PomodoroScreen(
             }
         }
 
-        // Celebration overlay
         if (showCelebration) {
             CelebrationAnimation(
                 message = stringResource(R.string.all_cycles_completed)
@@ -369,4 +357,3 @@ private fun PermissionWarningBanner() {
         }
     }
 }
-

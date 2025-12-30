@@ -84,7 +84,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Work Duration
             OutlinedTextField(
                 value = workDuration,
                 onValueChange = { workDuration = it.filter { char -> char.isDigit() } },
@@ -94,7 +93,6 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Short Break Duration
             OutlinedTextField(
                 value = shortBreakDuration,
                 onValueChange = { shortBreakDuration = it.filter { char -> char.isDigit() } },
@@ -104,7 +102,6 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Long Break Duration
             OutlinedTextField(
                 value = longBreakDuration,
                 onValueChange = { longBreakDuration = it.filter { char -> char.isDigit() } },
@@ -114,7 +111,6 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Sessions Until Long Break
             OutlinedTextField(
                 value = sessionsUntilLongBreak,
                 onValueChange = { sessionsUntilLongBreak = it.filter { char -> char.isDigit() } },
@@ -123,7 +119,6 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Total Cycles
             OutlinedTextField(
                 value = totalCycles,
                 onValueChange = { totalCycles = it.filter { char -> char.isDigit() } },
@@ -134,7 +129,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Keep Screen On
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -164,10 +158,8 @@ fun SettingsScreen(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Action Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -200,4 +192,5 @@ fun SettingsScreen(
         }
     }
 }
+
 

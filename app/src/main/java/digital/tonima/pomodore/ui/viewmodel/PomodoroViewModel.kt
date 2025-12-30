@@ -37,7 +37,6 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
         val settings = _uiState.value.settings
         val currentState = _uiState.value
 
-        // Reset sessions if all cycles were completed
         val shouldReset = currentState.completedSessions >= settings.totalCycles &&
                          currentState.timerState is TimerState.Idle
 
@@ -56,7 +55,7 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
                 ),
                 currentSession = if (shouldReset) 1 else it.currentSession,
                 completedSessions = if (shouldReset) 0 else it.completedSessions,
-                celebrationShown = if (shouldReset) false else it.celebrationShown  // Reset celebration flag
+                celebrationShown = if (shouldReset) false else it.celebrationShown
             )
         }
 
@@ -102,7 +101,7 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
                 timerState = TimerState.Idle,
                 currentSession = 1,
                 completedSessions = 0,
-                celebrationShown = false  // Reset celebration flag
+                celebrationShown = false
             )
         }
     }
@@ -118,9 +117,7 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
                 if (mode == TimerMode.WORK) {
                     val newCompletedSessions = currentState.completedSessions + 1
 
-                    // Check if we've reached the total cycles limit
                     if (newCompletedSessions >= currentState.settings.totalCycles) {
-                        // Reached the limit, stop the timer
                         _uiState.update {
                             it.copy(
                                 completedSessions = newCompletedSessions,
@@ -163,18 +160,16 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
                     val newCompletedSessions = currentState.completedSessions + 1
                     val newSession = currentState.currentSession + 1
 
-                    // Check if we've reached the total cycles limit
                     if (newCompletedSessions >= currentState.settings.totalCycles) {
                         _uiState.update {
                             it.copy(
                                 completedSessions = newCompletedSessions,
                                 currentSession = newCompletedSessions,
                                 timerState = TimerState.Idle,
-                                celebrationShown = false  // Allow celebration to show
+                                celebrationShown = false
                             )
                         }
                     } else {
-                        // Determine next break type
                         val nextMode = if (newCompletedSessions % currentState.settings.sessionsUntilLongBreak == 0) {
                             TimerMode.LONG_BREAK
                         } else {
@@ -189,11 +184,9 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
                             )
                         }
 
-                        // Auto-start the break
                         startTimer(nextMode)
                     }
                 } else {
-                    // Break completed, just mark as completed (user manually starts work)
                     _uiState.update {
                         it.copy(timerState = TimerState.Completed(state.mode))
                     }
@@ -245,4 +238,3 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
         timerJob?.cancel()
     }
 }
-

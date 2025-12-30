@@ -16,12 +16,24 @@ import digital.tonima.pomodore.data.model.TimerMode
 import digital.tonima.pomodore.data.model.TimerState
 import digital.tonima.pomodore.util.Constants
 import digital.tonima.pomodore.util.formatTime
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class PomodoroForegroundService : Service() {
 
     private val notificationManager by lazy {
-        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     }
+
+    private val serviceScope = CoroutineScope(Dispatchers.Default)
+    private var updateNotificationJob: Job? = null
+    private var currentTimerState: TimerState? = null
+    private var timerStartTimeMillis: Long = 0L
 
     override fun onCreate() {
         super.onCreate()
@@ -31,13 +43,42 @@ class PomodoroForegroundService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             Constants.ACTION_START, Constants.ACTION_RESUME -> {
-                val timerState = intent.getSerializableExtra(Constants.EXTRA_TIMER_STATE) as? TimerState
-                timerState?.let { updateNotification(it) }
+                @Suppress("DEPRECATION")
+                val timerState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getSerializableExtra(Constants.EXTRA_TIMER_STATE, TimerState::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getSerializableExtra(Constants.EXTRA_TIMER_STATE) as? TimerState
+                }
+                timerState?.let {
+                    currentTimerState = it
+                    timerStartTimeMillis = System.currentTimeMillis()
+                    updateNotification(it)
+
+                    if (it is TimerState.Running) {
+                        startNotificationUpdater(it)
+                    } else {
+                        stopNotificationUpdater()
+                    }
+                }
             }
             Constants.ACTION_PAUSE -> {
-                // Handled by MainActivity/ViewModel
+                @Suppress("DEPRECATION")
+                val timerState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getSerializableExtra(Constants.EXTRA_TIMER_STATE, TimerState::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getSerializableExtra(Constants.EXTRA_TIMER_STATE) as? TimerState
+                }
+                timerState?.let {
+                    currentTimerState = it
+                    stopNotificationUpdater()
+                    updateNotification(it)
+                }
             }
             Constants.ACTION_STOP -> {
+                stopNotificationUpdater()
+                currentTimerState = null
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
@@ -61,6 +102,37 @@ class PomodoroForegroundService : Service() {
         }
     }
 
+    private fun stopNotificationUpdater() {
+        updateNotificationJob?.cancel()
+        updateNotificationJob = null
+    }
+
+    private fun startNotificationUpdater(initialState: TimerState.Running) {
+        stopNotificationUpdater()
+
+        updateNotificationJob = serviceScope.launch {
+            var currentState = initialState
+            val startTime = System.currentTimeMillis()
+            val initialTimeRemaining = initialState.timeRemainingMillis
+
+            while (isActive && currentState.timeRemainingMillis > 0) {
+                val elapsedTime = System.currentTimeMillis() - startTime
+                val newTimeRemaining = (initialTimeRemaining - elapsedTime).coerceAtLeast(0)
+
+                currentState = currentState.copy(timeRemainingMillis = newTimeRemaining)
+                currentTimerState = currentState
+
+                updateNotification(currentState)
+
+                if (newTimeRemaining <= 0) {
+                    break
+                }
+
+                delay(1000)
+            }
+        }
+    }
+
     fun updateNotification(timerState: TimerState) {
         val notification = createNotification(timerState)
         notificationManager.notify(Constants.NOTIFICATION_ID, notification)
@@ -75,17 +147,16 @@ class PomodoroForegroundService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val (title, contentText, mode) = when (timerState) {
+        val (title, contentText) = when (timerState) {
             is TimerState.Running -> {
                 val titleRes = when (timerState.mode) {
                     TimerMode.WORK -> R.string.notification_title_work
                     TimerMode.SHORT_BREAK -> R.string.notification_title_short_break
                     TimerMode.LONG_BREAK -> R.string.notification_title_long_break
                 }
-                Triple(
+                Pair(
                     getString(titleRes),
-                    getString(R.string.notification_time_remaining, formatTime(timerState.timeRemainingMillis)),
-                    timerState.mode
+                    getString(R.string.notification_time_remaining, formatTime(timerState.timeRemainingMillis))
                 )
             }
             is TimerState.Paused -> {
@@ -94,13 +165,12 @@ class PomodoroForegroundService : Service() {
                     TimerMode.SHORT_BREAK -> R.string.notification_title_short_break
                     TimerMode.LONG_BREAK -> R.string.notification_title_long_break
                 }
-                Triple(
+                Pair(
                     getString(titleRes),
-                    getString(R.string.notification_paused),
-                    timerState.mode
+                    getString(R.string.notification_paused)
                 )
             }
-            else -> Triple(getString(R.string.app_name), "", TimerMode.WORK)
+            else -> Pair(getString(R.string.app_name), "")
         }
 
         val builder = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
@@ -112,7 +182,6 @@ class PomodoroForegroundService : Service() {
             .setSilent(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
 
-        // Add action buttons
         when (timerState) {
             is TimerState.Running -> {
                 builder.addAction(
@@ -153,6 +222,12 @@ class PomodoroForegroundService : Service() {
         )
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        stopNotificationUpdater()
+        serviceScope.cancel()
+    }
+
     companion object {
         fun startService(context: Context, timerState: TimerState) {
             val intent = Intent(context, PomodoroForegroundService::class.java).apply {
@@ -186,4 +261,3 @@ class PomodoroForegroundService : Service() {
         }
     }
 }
-

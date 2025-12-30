@@ -93,7 +93,6 @@ fun CelebrationAnimation(
             .background(Color.Black.copy(alpha = 0.7f)),
         contentAlignment = Alignment.Center
     ) {
-        // Confetti animation
         Canvas(modifier = Modifier.fillMaxSize()) {
             confettiList.forEach { confetti ->
                 val progress = animationProgress.value
@@ -109,7 +108,6 @@ fun CelebrationAnimation(
             }
         }
 
-        // Celebration message with scale animation
         Box(
             modifier = Modifier
                 .padding(32.dp)
@@ -142,7 +140,6 @@ private fun DrawScope.drawConfetti(
     val canvasWidth = size.width
     val canvasHeight = size.height
 
-    // Calculate position with slight horizontal movement
     val x = (confetti.x + sin(progress * 10 + confetti.angle) * 0.05f) * canvasWidth
     val y = currentY * canvasHeight
 
@@ -152,4 +149,3 @@ private fun DrawScope.drawConfetti(
         center = Offset(x, y)
     )
 }
-

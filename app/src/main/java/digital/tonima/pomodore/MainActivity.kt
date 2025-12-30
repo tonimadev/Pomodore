@@ -10,9 +10,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,8 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,16 +43,20 @@ import digital.tonima.pomodore.ui.screens.SettingsScreen
 import digital.tonima.pomodore.ui.theme.PomodoreTheme
 import digital.tonima.pomodore.ui.viewmodel.PomodoroViewModel
 import digital.tonima.pomodore.util.Constants
+import kotlinx.coroutines.delay
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    private var showPermissionDialog by mutableStateOf(false)
+    private var intentAction by mutableStateOf<String?>(null)
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (!isGranted) {
-            // Handle permission denied
+            showPermissionDialog = true
         }
     }
 
@@ -51,7 +64,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Request notification permission for Android 13+
+        intentAction = intent?.action
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -68,24 +82,13 @@ class MainActivity : ComponentActivity() {
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 val navController = rememberNavController()
 
-                // Track intent action changes with state
-                var lastProcessedAction by remember { mutableStateOf<String?>(null) }
-                val currentAction = rememberUpdatedState(intent?.action)
-
-                // Handle notification actions - process each action when it changes
-                LaunchedEffect(currentAction.value) {
-                    val action = currentAction.value
-                    // Only process if this is a new action we haven't processed yet
-                    if (action != null && action != lastProcessedAction) {
+                LaunchedEffect(uiState.timerState) {
+                    intentAction?.let { action ->
                         handleIntent(Intent().apply { this.action = action }, viewModel)
-                        lastProcessedAction = action
-                        // Clear action after brief delay to allow re-triggering same action
-                        kotlinx.coroutines.delay(100)
-                        lastProcessedAction = null
+                        intentAction = null
                     }
                 }
 
-                // Update foreground service when timer state changes
                 LaunchedEffect(uiState.timerState) {
                     when (val state = uiState.timerState) {
                         is TimerState.Running -> {
@@ -103,7 +106,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                // Control screen on/off based on settings and timer state
                 LaunchedEffect(uiState.settings.keepScreenOn, uiState.timerState) {
                     if (uiState.settings.keepScreenOn &&
                         (uiState.timerState is TimerState.Running || uiState.timerState is TimerState.Paused)) {
@@ -114,14 +116,32 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Check notification permission status
-                    val hasNotificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        ContextCompat.checkSelfPermission(
-                            this@MainActivity,
-                            Manifest.permission.POST_NOTIFICATIONS
-                        ) == PackageManager.PERMISSION_GRANTED
-                    } else {
-                        true
+                    var hasNotificationPermission by remember { mutableStateOf(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            ContextCompat.checkSelfPermission(
+                                this@MainActivity,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ) == PackageManager.PERMISSION_GRANTED
+                        } else {
+                            true
+                        }
+                    ) }
+
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            delay(1000)
+                            val newPermissionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                ContextCompat.checkSelfPermission(
+                                    this@MainActivity,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                ) == PackageManager.PERMISSION_GRANTED
+                            } else {
+                                true
+                            }
+                            if (newPermissionStatus != hasNotificationPermission) {
+                                hasNotificationPermission = newPermissionStatus
+                            }
+                        }
                     }
 
                     NavHost(
@@ -138,7 +158,6 @@ class MainActivity : ComponentActivity() {
                                 onStopClick = { viewModel.stopTimer() },
                                 onSkipClick = { viewModel.skipToNext() },
                                 onSettingsClick = {
-                                    // Only navigate if timer is not active
                                     val isTimerActive = uiState.timerState is TimerState.Running ||
                                                        uiState.timerState is TimerState.Paused
                                     if (!isTimerActive) {
@@ -160,6 +179,51 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
+                if (showPermissionDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showPermissionDialog = false },
+                        title = {
+                            Text(
+                                text = "Permissão de Notificações",
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        },
+                        text = {
+                            Column {
+                                Text(
+                                    text = "O aplicativo precisa de permissão para enviar notificações para que o timer funcione corretamente em segundo plano.",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Sem essa permissão, você não receberá notificações quando o timer estiver em execução.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    showPermissionDialog = false
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                }
+                            ) {
+                                Text("Permitir")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showPermissionDialog = false }
+                            ) {
+                                Text("Agora Não")
+                            }
+                        }
+                    )
+                }
             }
         }
     }
@@ -167,7 +231,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        // Re-trigger intent handling when activity receives a new intent from notification
+        intentAction = intent.action
     }
 
     private fun handleIntent(intent: Intent?, viewModel: PomodoroViewModel) {
@@ -180,4 +244,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
