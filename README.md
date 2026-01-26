@@ -1,6 +1,18 @@
+<img src="/images/pomodore-banner.png" width="1024" height="500">
+
 # Pomodore - App Pomodoro com MVVM
 
 App Android de técnica Pomodoro desenvolvido com arquitetura MVVM, Jetpack Compose e internacionalização completa.
+
+## Download
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://playbadges.pavi2410.com/badge/full?id=digital.tonima.pomodore&theme=dark">
+  <img alt="PlayBadges Card Folo" src="https://playbadges.pavi2410.com/badge/full?id=digital.tonima.pomodore">
+</picture>
+
+<a href='https://play.google.com/store/apps/details?id=digital.tonima.pomodore' target="_blank" rel="noopener noreferrer"><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width='200'/></a>
+
 
 ## ✨ Funcionalidades
 
